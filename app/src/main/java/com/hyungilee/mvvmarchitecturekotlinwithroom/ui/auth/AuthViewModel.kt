@@ -3,6 +3,7 @@ package com.hyungilee.mvvmarchitecturekotlinwithroom.ui.auth
 import android.view.View
 import androidx.lifecycle.ViewModel
 import com.hyungilee.mvvmarchitecturekotlinwithroom.data.repositories.UserRepository
+import com.hyungilee.mvvmarchitecturekotlinwithroom.util.ApiException
 import com.hyungilee.mvvmarchitecturekotlinwithroom.util.Coroutines
 
 class AuthViewModel : ViewModel() {
@@ -28,17 +29,27 @@ class AuthViewModel : ViewModel() {
 //        val loginResponse = UserRepository().userLogin(email!!, password!!)
 //        authListener?.onSuccess(loginResponse)
 
+//            val response = UserRepository().userLogin(email!!, password!!)
+//            if(response.isSuccessful){
+//                authListener?.onSuccess(response.body()?.user!!)
+//            }else{
+//                authListener?.onFailure("Error code: ${response.code()}")
+//            }
+
         // util > Coroutines 에 작성해 준 main() 메소드를 사용해서 실행해준다.
         Coroutines.main {
-            val response = UserRepository().userLogin(email!!, password!!)
-            if(response.isSuccessful){
-                authListener?.onSuccess(response.body()?.user!!)
-            }else{
-                authListener?.onFailure("Error code: ${response.code()}")
+
+            try {
+                val authResponse = UserRepository().userLogin(email!!, password!!)
+                authResponse.user?.let{
+                    authListener?.onSuccess(it)
+                    return@main
+                }
+                authListener?.onFailure(authResponse.message!!)
+            }catch (e: ApiException){
+                authListener?.onFailure(e.message!!)
             }
         }
-
-
     }
 
 }

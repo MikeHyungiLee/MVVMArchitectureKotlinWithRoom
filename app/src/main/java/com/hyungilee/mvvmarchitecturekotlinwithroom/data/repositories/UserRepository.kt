@@ -3,17 +3,18 @@ package com.hyungilee.mvvmarchitecturekotlinwithroom.data.repositories
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.hyungilee.mvvmarchitecturekotlinwithroom.data.network.MyApi
+import com.hyungilee.mvvmarchitecturekotlinwithroom.data.network.SafeApiRequest
 import com.hyungilee.mvvmarchitecturekotlinwithroom.data.network.response.AuthResponse
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class UserRepository {
+class UserRepository : SafeApiRequest() {
 
     // Api 메소드를 suspend fun 메소드로 수정한 뒤에 Repository method
-    suspend fun userLogin(email: String, password: String) : Response<AuthResponse>{
-        return MyApi().userLogin(email, password)
+    suspend fun userLogin(email: String, password: String) : AuthResponse{
+        return apiRequest{ MyApi().userLogin(email, password) }
     }
 
     // Retrofit call 로 작성했을때의 코드
