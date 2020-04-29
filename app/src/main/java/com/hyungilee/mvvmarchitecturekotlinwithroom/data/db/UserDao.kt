@@ -14,7 +14,7 @@ interface UserDao{
     // insert update (return user id)
     // override the user
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun upsert(user: User) : Long
+    suspend fun upsert(user: User) : Long
 
     @Query("SELECT * FROM user WHERE uid = $CURRENT_USER_ID")
     fun getuser() : LiveData<User>
