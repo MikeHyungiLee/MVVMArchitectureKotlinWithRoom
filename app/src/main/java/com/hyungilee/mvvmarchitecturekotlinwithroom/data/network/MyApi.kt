@@ -2,6 +2,7 @@ package com.hyungilee.mvvmarchitecturekotlinwithroom.data.network
 
 import android.telecom.Call
 import com.hyungilee.mvvmarchitecturekotlinwithroom.data.network.response.AuthResponse
+import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -24,8 +25,17 @@ interface MyApi {
     ) : Response<AuthResponse>
 
     companion object{
-        operator fun invoke() : MyApi{
+        operator fun invoke(
+            networkConnectionInterceptor: NetworkConnectionInterceptor
+        ) : MyApi{
+
+            // MyApi인터페이스에서는 context를 지정할 수 없다.
+            val okHttpClient = OkHttpClient.Builder()
+                .addInterceptor(networkConnectionInterceptor)
+                .build()
+
             return Retrofit.Builder()
+                .client(okHttpClient)
                 .baseUrl("https://api.simplifiedcoding.in/course-apis/mvvm/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()

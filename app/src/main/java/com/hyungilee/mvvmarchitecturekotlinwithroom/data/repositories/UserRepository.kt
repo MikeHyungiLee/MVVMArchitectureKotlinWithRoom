@@ -2,6 +2,8 @@ package com.hyungilee.mvvmarchitecturekotlinwithroom.data.repositories
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.hyungilee.mvvmarchitecturekotlinwithroom.data.db.AppDatabase
+import com.hyungilee.mvvmarchitecturekotlinwithroom.data.db.entities.User
 import com.hyungilee.mvvmarchitecturekotlinwithroom.data.network.MyApi
 import com.hyungilee.mvvmarchitecturekotlinwithroom.data.network.SafeApiRequest
 import com.hyungilee.mvvmarchitecturekotlinwithroom.data.network.response.AuthResponse
@@ -10,12 +12,20 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class UserRepository : SafeApiRequest() {
+class UserRepository(
+    private val api: MyApi,
+    private val db: AppDatabase
+) : SafeApiRequest() {
 
     // Api 메소드를 suspend fun 메소드로 수정한 뒤에 Repository method
     suspend fun userLogin(email: String, password: String) : AuthResponse{
-        return apiRequest{ MyApi().userLogin(email, password) }
+        return apiRequest{ api.userLogin(email, password) }
     }
+
+    // local db(room database 처리 메소드)
+    suspend fun saveUser(user: User) = db.getUserDao().upsert(user)
+
+    fun getUser() = db.getUserDao().getuser()
 
     // Retrofit call 로 작성했을때의 코드
 //    fun userLogin(email: String, password: String) : LiveData<String>{

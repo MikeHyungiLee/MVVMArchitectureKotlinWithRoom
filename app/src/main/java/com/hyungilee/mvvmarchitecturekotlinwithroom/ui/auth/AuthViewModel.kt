@@ -5,13 +5,19 @@ import androidx.lifecycle.ViewModel
 import com.hyungilee.mvvmarchitecturekotlinwithroom.data.repositories.UserRepository
 import com.hyungilee.mvvmarchitecturekotlinwithroom.util.ApiException
 import com.hyungilee.mvvmarchitecturekotlinwithroom.util.Coroutines
+import com.hyungilee.mvvmarchitecturekotlinwithroom.util.NoInternetException
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(
+    private val repository: UserRepository
+) : ViewModel() {
 
     var email: String? = null
     var password: String? = null
 
     var authListener: AuthListener? = null
+
+    // To observe the local db changes(User changes)
+    fun getLoggedInUser() = repository.getUser()
 
     // login 버튼 event function
     fun onLoginButtonClick(view: View){
@@ -40,13 +46,17 @@ class AuthViewModel : ViewModel() {
         Coroutines.main {
 
             try {
-                val authResponse = UserRepository().userLogin(email!!, password!!)
+                val authResponse = repository.userLogin(email!!, password!!)
                 authResponse.user?.let{
                     authListener?.onSuccess(it)
+                    // local db에 User정보를 저장한다.
+                    repository.saveUser(it)
                     return@main
                 }
                 authListener?.onFailure(authResponse.message!!)
             }catch (e: ApiException){
+                authListener?.onFailure(e.message!!)
+            }catch (e: NoInternetException){
                 authListener?.onFailure(e.message!!)
             }
         }
